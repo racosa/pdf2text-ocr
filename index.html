@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<script src=" https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.min.js "></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<script type="module">
+  const pdfjs = window["pdfjs-dist/build/pdf"];
+  // pdfjsLib.GlobalWorkerOptions.workerSrc =
+  //  "//mozilla.github.io/pdf.js/build/pdf.worker.js";
+
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener("loadend", (event) =>
+        resolve(event.target.result)
+      );
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const fileInput = document.getElementById("file-input");
+  fileInput.addEventListener("change", async () => {
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(await readFile(fileInput.files[0])),
+    });
+    loadingTask.promise.then(function (pdf) {
+      console.log(pdf);
+      const container = document.getElementById("container");
+      const images = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        pdf.getPage(pageNumber).then(function (page) {
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement("canvas");
+          container.appendChild(canvas);
+
+          // Prepare canvas using PDF page dimensions
+          const context = canvas.getContext("2d");
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          // Render PDF page into canvas context
+          page
+            .render({ canvasContext: context, viewport: viewport })
+            .promise.then(async function () {
+              images.push(canvas.toDataURL("image/png"));
+              const worker = await Tesseract.createWorker({
+                logger: (m) => console.log(m),
+              });
+              await worker.loadLanguage("eng");
+              await worker.initialize("eng");
+              const {
+                data: { text },
+              } = await worker.recognize(canvas.toDataURL("image/png"));
+              // } = await worker.recognize(data[0]);
+              console.log(text);
+              await worker.terminate();
+            });
+        });
+      }
+    });
+  });
+</script>
+
+<input type="file" id="file-input" multiple />
+<div id="container"></div>
+
+<style>
+  #container {
+    display: none;
+  }
+</style>
