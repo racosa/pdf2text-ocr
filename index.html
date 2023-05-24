@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<script src=" https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.min.js "></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.min.js "></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
 <script type="module">
   const pdfjs = window["pdfjs-dist/build/pdf"];
-  // pdfjsLib.GlobalWorkerOptions.workerSrc =
-  //  "//mozilla.github.io/pdf.js/build/pdf.worker.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.worker.js";
 
   const readFile = (file) => {
     return new Promise((resolve) => {
@@ -16,54 +17,58 @@
     });
   };
 
+  const convertToText = async (images) => {
+    const worker = await Tesseract.createWorker({
+      logger: (m) => console.log(m),
+    });
+    await worker.loadLanguage("eng");
+    await worker.initialize("eng");
+
+    const container = document.getElementById("container");
+    for (const image of images) {
+      const {
+        data: { text },
+      } = await worker.recognize(image);
+      console.log(text);
+      container.appendChild(document.createTextNode(text));
+    }
+
+    await worker.terminate();
+  };
+
   const fileInput = document.getElementById("file-input");
   fileInput.addEventListener("change", async () => {
     const loadingTask = pdfjsLib.getDocument({
       data: new Uint8Array(await readFile(fileInput.files[0])),
     });
-    loadingTask.promise.then(function (pdf) {
-      console.log(pdf);
+
+    loadingTask.promise.then(async (pdf) => {
       const container = document.getElementById("container");
       const images = [];
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-        pdf.getPage(pageNumber).then(function (page) {
-          const viewport = page.getViewport({ scale: 1.5 });
-          const canvas = document.createElement("canvas");
-          container.appendChild(canvas);
-
-          // Prepare canvas using PDF page dimensions
-          const context = canvas.getContext("2d");
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-
-          // Render PDF page into canvas context
-          page
-            .render({ canvasContext: context, viewport: viewport })
-            .promise.then(async function () {
-              images.push(canvas.toDataURL("image/png"));
-              const worker = await Tesseract.createWorker({
-                logger: (m) => console.log(m),
-              });
-              await worker.loadLanguage("eng");
-              await worker.initialize("eng");
-              const {
-                data: { text },
-              } = await worker.recognize(canvas.toDataURL("image/png"));
-              // } = await worker.recognize(data[0]);
-              console.log(text);
-              await worker.terminate();
-            });
-        });
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        container.appendChild(canvas);
+        await page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport: viewport,
+        }).promise;
+        images.push(canvas.toDataURL("image/png"));
       }
+      convertToText(images);
     });
   });
 </script>
 
+<h1>pdf2text-ocr</h1>
 <input type="file" id="file-input" multiple />
 <div id="container"></div>
 
 <style>
-  #container {
+  canvas {
     display: none;
   }
 </style>
