@@ -11,18 +11,38 @@
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.addEventListener("loadend", (event) =>
-        resolve(event.target.result)
+        resolve(new Uint8Array(event.target.result))
       );
       reader.readAsArrayBuffer(file);
     });
   };
 
+  const convertToImage = async (pdf) => {
+    const container = document.getElementById("container");
+    const images = [];
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement("canvas");
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      container.appendChild(canvas);
+      await page.render({
+        canvasContext: canvas.getContext("2d"),
+        viewport: viewport,
+      }).promise;
+      images.push(canvas.toDataURL("image/png"));
+    }
+    return images;
+  };
+
   const convertToText = async (images) => {
+    const language = "eng";
     const worker = await Tesseract.createWorker({
       logger: (m) => console.log(m),
     });
-    await worker.loadLanguage("eng");
-    await worker.initialize("eng");
+    await worker.loadLanguage(language);
+    await worker.initialize(language);
 
     const container = document.getElementById("container");
     for (const image of images) {
@@ -36,31 +56,19 @@
     await worker.terminate();
   };
 
-  const fileInput = document.getElementById("file-input");
-  fileInput.addEventListener("change", async () => {
-    const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(await readFile(fileInput.files[0])),
-    });
+  const loadFile = async (file) => pdfjsLib.getDocument({ data: file }).promise;
 
-    loadingTask.promise.then(async (pdf) => {
-      const container = document.getElementById("container");
-      const images = [];
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-        const page = await pdf.getPage(pageNumber);
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement("canvas");
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        container.appendChild(canvas);
-        await page.render({
-          canvasContext: canvas.getContext("2d"),
-          viewport: viewport,
-        }).promise;
-        images.push(canvas.toDataURL("image/png"));
-      }
+  const convertFile = async (file) => {
+    loadFile(file).then(async (pdf) => {
+      const images = await convertToImage(pdf);
       convertToText(images);
     });
-  });
+  };
+
+  const fileInput = document.getElementById("file-input");
+  fileInput.addEventListener("change", async () =>
+    convertFile(await readFile(fileInput.files[0]))
+  );
 </script>
 
 <h1>pdf2text-ocr</h1>
