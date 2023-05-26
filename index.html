@@ -65,11 +65,19 @@
         pdfjsLib.getDocument({ data: file }).promise;
 
       const convertFile = async (file) => {
+        showLoading();
         loadFile(file).then(async (pdf) => {
           const images = await convertToImage(pdf);
-          convertToText(images);
+          await convertToText(images);
+          hideLoading();
         });
       };
+
+      const showLoading = () =>
+        (document.getElementById("loading").style.display = "block");
+
+      const hideLoading = () =>
+        (document.getElementById("loading").style.display = "none");
 
       const fileInput = document.getElementById("file-input");
       fileInput.addEventListener("change", async () =>
@@ -80,8 +88,12 @@
 
   <body>
     <h1>pdf2text-ocr</h1>
-    <input type="file" id="file-input" multiple />
+    <div>
+      <label for="file-input">Choose a pdf file</label><br />
+      <input type="file" id="file-input" name="file-input" multiple />
+    </div>
     <div id="container"></div>
+    <div id="loading">Loading...</div>
   </body>
 
   <style>
@@ -93,6 +105,24 @@
       line-height: 1.5;
       max-width: 960px;
       margin: auto;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    label {
+      padding: 0.5em;
+      border: thin solid grey;
+      border-radius: 3px;
+      cursor: pointer;
+      background-color: #f6f6fb;
+    }
+
+    #loading {
+      display: none;
+      margin-top: 2rem;
+      margin-bottom: 3rem;
     }
 
     section {
@@ -110,6 +140,7 @@
 
     pre {
       font-family: Arial, sans-serif;
+      margin: 0;
     }
 
     canvas {
