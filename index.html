@@ -39,9 +39,7 @@
 
       const convertToText = async (images) => {
         const language = "eng";
-        const worker = await Tesseract.createWorker({
-          logger: (m) => console.log(m),
-        });
+        const worker = await Tesseract.createWorker();
         await worker.loadLanguage(language);
         await worker.initialize(language);
 
@@ -50,7 +48,6 @@
           const {
             data: { text },
           } = await worker.recognize(image);
-          console.log(text);
           const section = document.createElement("section");
           const pre = document.createElement("pre");
           pre.appendChild(document.createTextNode(text));
