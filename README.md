@@ -2,7 +2,7 @@
 
 [pdf2text-ocr](https://racosa.github.io/pdf2text-ocr/) is a simple tool for converting PDF to text using OCR. Files are converted locally in the browser and are never uploaded to external servers.
 
-It can be useful if you are getting gibberish text when copying and pasting text from PDF ([example](https://superuser.com/questions/137824/pdf-has-garbled-text-when-copy-pasting)). Specially if you don't want to or cannot use a cloud-based solution.
+It can be useful if you are getting gibberish when copying and pasting text from PDF ([example](https://superuser.com/questions/137824/pdf-has-garbled-text-when-copy-pasting)), specially if you don't want to or cannot use a cloud-based solution.
 
 ## Demo
 
