@@ -88,7 +88,23 @@
 
   <body>
     <h1>pdf2text-ocr</h1>
-    <div>
+    <p>
+      <a href="https://racosa.github.io/pdf2text-ocr/">pdf2text-ocr</a> is a
+      simple tool for converting PDF to text using OCR. Files are converted
+      locally in the browser and are never uploaded to external servers.
+    </p>
+    <p>
+      It can be useful if you are getting gibberish text when copying and
+      pasting text from PDF (<a
+        href="https://superuser.com/questions/137824/pdf-has-garbled-text-when-copy-pasting"
+        >example</a
+      >). Specially if you don't want to or cannot use a cloud-based solution.
+    </p>
+    <p>
+      Free and open-source:
+      <a href="https://github.com/racosa/pdf2text-ocr">Github</a>
+    </p>
+    <div id="file-input-button">
       <label for="file-input">Choose a pdf file</label><br />
       <input type="file" id="file-input" name="file-input" multiple />
     </div>
@@ -103,8 +119,17 @@
       scroll-behavior: smooth;
       font-size: 1.15rem;
       line-height: 1.5;
-      max-width: 960px;
+      max-width: 850px;
       margin: auto;
+      padding-top: 1rem;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     input[type="file"] {
@@ -117,6 +142,10 @@
       border-radius: 3px;
       cursor: pointer;
       background-color: #f6f6fb;
+    }
+
+    #file-input-button {
+      margin-top: 2rem;
     }
 
     #loading {
