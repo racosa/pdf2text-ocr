@@ -180,11 +180,16 @@
         (document.getElementById("loading").style.display = "none");
 
       const clearResults = () => {
-        let container = document.getElementById("container");
-        container.remove();
-        container = document.createElement("div");
-        container.id = "container";
-        document.body.appendChild(container);
+        ["container", "loading"].forEach((id) => {
+          let element = document.getElementById(id);
+          element.remove();
+          element = document.createElement("div");
+          element.id = id;
+          if (id === "loading") {
+            element.appendChild(document.createTextNode("Loading..."));
+          }
+          document.body.appendChild(element);
+        });
       };
 
       const languageSelect = document.getElementById("language-select");
