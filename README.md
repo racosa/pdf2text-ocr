@@ -70,3 +70,7 @@ Please make sure when purchasing a motor vehicle that you obtain a Tax Invoice i
 GST for business purposes. The Purchase Contract does not constitute a Tax Invoice.
 Created by Julia Hartman B.Bus CPA - Tax Accountant -7
 ```
+
+## How it works
+
+Each page of the PDF is converted to an image using [PDF.js](https://mozilla.github.io/pdf.js/) and each image is converted to text using [Tesseract.js](https://github.com/naptha/tesseract.js). The results are displayed in the browser allowing users to copy the text, search, etc.
