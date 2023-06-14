@@ -166,11 +166,10 @@
 
       const convertFile = async (file) => {
         showLoading();
-        loadFile(file).then(async (pdf) => {
-          const images = await convertToImage(pdf);
-          await convertToText(images);
-          hideLoading();
-        });
+        const pdf = await loadFile(file);
+        const images = await convertToImage(pdf);
+        await convertToText(images);
+        hideLoading();
       };
 
       const showLoading = () =>
@@ -179,8 +178,13 @@
       const hideLoading = () =>
         (document.getElementById("loading").style.display = "none");
 
+      const showError = (error) =>
+        document
+          .getElementById("error")
+          .appendChild(document.createTextNode(`Error: ${error.message}`));
+
       const clearResults = () => {
-        ["container", "loading"].forEach((id) => {
+        ["container", "loading", "error"].forEach((id) => {
           let element = document.getElementById(id);
           element.remove();
           element = document.createElement("div");
@@ -209,7 +213,12 @@
       const fileInput = document.getElementById("file-input");
       fileInput.addEventListener("change", async () => {
         clearResults();
-        convertFile(await readFile(fileInput.files[0]));
+        try {
+          await convertFile(await readFile(fileInput.files[0]));
+        } catch (error) {
+          hideLoading();
+          showError(error);
+        }
       });
     </script>
   </head>
@@ -245,6 +254,7 @@
     </div>
     <div id="container"></div>
     <div id="loading">Loading...</div>
+    <div id="error"></div>
   </body>
 
   <style>
@@ -296,10 +306,14 @@
       margin-right: 1rem;
     }
 
-    #loading {
-      display: none;
+    #loading,
+    #error {
       margin-top: 2rem;
       margin-bottom: 3rem;
+    }
+
+    #loading {
+      display: none;
     }
 
     section {
