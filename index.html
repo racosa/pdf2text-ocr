@@ -241,14 +241,12 @@
       Free and open source:
       <a href="https://github.com/racosa/pdf2text-ocr">Github</a>
     </p>
+
+    <p>Select a language and a PDF file:</p>
     <div id="input-container">
-      <p>Select the language and a file:</p>
+      <select name="languages" id="language-select"></select>
       <div>
-        <select name="languages" id="language-select"></select>
-      </div>
-      <div>
-        <label id="file-input-label" for="file-input">Select a file</label
-        ><br />
+        <label id="file-input-label" for="file-input">Choose file</label>
         <input type="file" id="file-input" name="file-input" multiple />
       </div>
     </div>
@@ -266,7 +264,7 @@
       line-height: 1.5;
       max-width: 850px;
       margin: auto;
-      padding-top: 1rem;
+      padding: 1rem;
     }
 
     a {
@@ -278,10 +276,16 @@
     }
 
     select {
+      width: 320px;
+      appearance: none;
       font-size: 1.15rem;
       font-family: inherit;
-      line-height: inherit;
-      padding-left: 1rem;
+      background-image: linear-gradient(45deg, transparent 49%, black 51%),
+      linear-gradient(135deg, black 51%, transparent 49%);
+      background-position: calc(100% - 15px), calc(100% - 10px);
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      text-overflow: ellipsis;
     }
 
     input[type="file"] {
@@ -298,12 +302,17 @@
     }
 
     #input-container {
-      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
     }
 
-    #input-container div {
-      display: inline-block;
-      margin-right: 1rem;
+    @media (max-width: 640px){
+      #input-container{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
     }
 
     #loading,
